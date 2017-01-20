@@ -1,0 +1,25 @@
+# TED talk and YouTube file merging
+# The YouTube file is from George, but we hand-added columns
+# The TED talk file is from https://data.world/owentemple/ted-talks-complete-list
+
+# Fix the raw TED talks file from data.world - this will give us an
+# ASCII-compatible file encoding in UTF-8 with local line endings
+# (instead of iso-8851-1 with Mac line endings)
+fix-ted:
+    command: ./clean.py -i ted_talks_raw.csv -e iso-8859-1 -o ted_talks.csv
+    delOnFail: true
+    inputs:
+        - clean.py
+        - ted_talks_raw.csv
+    outputs:
+        - ted_talks.csv
+
+# Note as necessary as with the TED file above, but also fix the YT file.
+fix-yt:
+    command: ./clean.py -i yt_ted_raw.csv -e utf-8 -o yt_ted.csv
+    delOnFail: true
+    inputs:
+        - clean.py
+        - yt_ted_raw.csv
+    outputs:
+        - yt_ted.csv
