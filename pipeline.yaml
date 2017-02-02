@@ -16,10 +16,19 @@ fix-ted:
 
 # Note as necessary as with the TED file above, but also fix the YT file.
 fix-yt:
-    command: ./clean.py -i yt_ted_raw.csv -e utf-8 -o yt_ted.csv
+    command: ./clean.py -i yt_ted_raw.csv -e utf-8 -o yt_ted_clean.csv
     delOnFail: true
     inputs:
         - clean.py
         - yt_ted_raw.csv
+    outputs:
+        - yt_ted_clean.csv
+
+fmt-yt:
+    command: "./yt_recol.py < yt_ted_clean.csv > yt_ted.csv"
+    delOnFail: true
+    inputs:
+        - yt_recol.py
+        - yt_ted_clean.csv
     outputs:
         - yt_ted.csv
