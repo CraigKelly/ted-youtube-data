@@ -14,7 +14,7 @@ fix-ted:
     outputs:
         - ted_talks.csv
 
-# Note as necessary as with the TED file above, but also fix the YT file.
+# Clean the raw YouTube file as well
 fix-yt:
     command: ./clean.py -i yt_ted_raw.csv -e utf-8 -o yt_ted_clean.csv
     delOnFail: true
@@ -24,11 +24,24 @@ fix-yt:
     outputs:
         - yt_ted_clean.csv
 
+# Fix columns (and use the ted_talks.csv file for xref)
 fmt-yt:
     command: "./yt_recol.py < yt_ted_clean.csv > yt_ted.csv"
     delOnFail: true
     inputs:
         - yt_recol.py
         - yt_ted_clean.csv
+        - ted_talks.csv
     outputs:
         - yt_ted.csv
+
+# Now create a "joined" file with information from both
+join-both:
+    command: ./join-ted.py --ted ted_talks.csv --yt yt_ted.csv > ted_joined.csv
+    delOnFail: true
+    inputs:
+        - join-ted.py
+        - ted_talks.csv
+        - yt_ted.csv
+    outputs:
+        - ted_joined.csv
