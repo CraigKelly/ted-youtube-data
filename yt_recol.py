@@ -7,6 +7,9 @@
 import sys
 import csv
 
+from common import log
+
+
 OUTPUT_COLS = [
     "Speaker",
     "Descrip",
@@ -21,15 +24,6 @@ DS_BAD_SUFFIX = set([
     "ted talk",
     "ted.com"
 ])
-
-
-def log(msg, *args):
-    """Log to stderr with optional formatting."""
-    if args:
-        msg = msg % args
-    sys.stderr.write(msg)
-    sys.stderr.write("\n")
-    sys.stderr.flush()
 
 
 def main():

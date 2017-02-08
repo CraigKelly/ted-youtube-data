@@ -10,6 +10,7 @@ fix-ted:
     delOnFail: true
     inputs:
         - clean.py
+        - common.py
         - ted_talks_raw.csv
     outputs:
         - ted_talks.csv
@@ -20,6 +21,7 @@ fix-yt:
     delOnFail: true
     inputs:
         - clean.py
+        - common.py
         - yt_ted_raw.csv
     outputs:
         - yt_ted_clean.csv
@@ -28,8 +30,10 @@ fix-yt:
 fmt-yt:
     command: "./yt_recol.py < yt_ted_clean.csv > yt_ted.csv"
     delOnFail: true
+    direct: true
     inputs:
         - yt_recol.py
+        - common.py
         - yt_ted_clean.csv
         - ted_talks.csv
     outputs:
@@ -39,9 +43,23 @@ fmt-yt:
 join-both:
     command: ./join-ted.py --ted ted_talks.csv --yt yt_ted.csv > ted_joined.csv
     delOnFail: true
+    direct: true
     inputs:
         - join-ted.py
+        - common.py
         - ted_talks.csv
         - yt_ted.csv
     outputs:
         - ted_joined.csv
+
+# Run some checks to make sure everything is OK
+checks:
+    command: "./checks.py < ted_joined.csv 2>&1 | tee checks.log"
+    delOnFail: true
+    direct: true
+    inputs:
+        - checks.py
+        - common.py
+        - ted_joined.csv
+    outputs:
+        - checks.log

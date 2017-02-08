@@ -3,19 +3,12 @@
 """Clean up any "bad" characters."""
 
 import os
-import sys
 import argparse
+import csv
 
 from unidecode import unidecode
 
-
-def log(msg, *args):
-    """Log to stderr with optional formatting."""
-    if args:
-        msg = msg % args
-    sys.stderr.write(msg)
-    sys.stderr.write("\n")
-    sys.stderr.flush()
+from common import log
 
 
 def main():
@@ -38,10 +31,11 @@ def main():
         os.remove(args.output)
 
     with open(args.input, "r", encoding=args.encoding) as inp:
-        buf = unidecode(inp.read())
-        # Only open output file if conversion above successful
+        read = csv.reader(inp)
         with open(args.output, "w", encoding="utf-8") as outp:
-            outp.write(buf)
+            write = csv.writer(outp)
+            for rec in read:
+                write.writerow([unidecode(i) for i in rec])
 
 
 if __name__ == '__main__':

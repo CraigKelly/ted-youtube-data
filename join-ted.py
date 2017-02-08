@@ -8,6 +8,8 @@ import argparse
 import sys
 import csv
 
+from common import log
+
 # Not currently used but good for documentation
 # TED_COLS = [
 #     "id",
@@ -32,14 +34,24 @@ import csv
 #     "Descrip|Speaker"
 # ]
 
-
-def log(msg, *args):
-    """Log to stderr with optional formatting."""
-    if args:
-        msg = msg % args
-    sys.stderr.write(msg)
-    sys.stderr.write("\n")
-    sys.stderr.flush()
+OUTPUT_COLS = [
+    "ted_id",
+    "speaker",  # Speaker in YT
+    "headline",  # Descrip in YT
+    "TED_URL",
+    "transcript_URL",
+    "youtube_url",  # YTLink
+    "month_filmed",
+    "year_filmed",
+    "event",
+    "time_str",  # TimeStr in YT
+    "duration",
+    "date_published",
+    "youtube_title",  # Descrip|Speaker in YT
+    "views_text",  # ViewStr in YT
+    "tags",
+    "description",
+]
 
 
 def main():
@@ -77,25 +89,6 @@ def main():
     log("In YT without matching TED talks: %d", len(yt_keys - ted_keys))
     # for k in yt_keys - ted_keys:
     #     log(" %s: %s", k, yt_xref[k]["YTLink"])
-
-    OUTPUT_COLS = [
-        "ted_id",
-        "speaker",  # Speaker in YT
-        "headline",  # Descrip in YT
-        "TED_URL",
-        "transcript_URL",
-        "youtube_url",  # YTLink
-        "month_filmed",
-        "year_filmed",
-        "event",
-        "time_str"  # TimeStr in YT
-        "duration",
-        "date_published",
-        "youtube_title",  # Descrip|Speaker in YT
-        "views_text",  # ViewStr in YT
-        "tags",
-        "description",
-    ]
 
     outp = csv.writer(sys.stdout, quoting=csv.QUOTE_NONNUMERIC)
     outp.writerow(OUTPUT_COLS)
