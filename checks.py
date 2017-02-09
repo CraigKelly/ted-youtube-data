@@ -2,15 +2,28 @@
 
 """Check the given ted file (which should have been written by join-ted.py)."""
 
-# pylama:ignore=E501
+# pylama:ignore=E501,E302,E305
 
 import sys
 import csv
 
+from functools import wraps
+
 from common import log
 
+CHECKS = []
 
-def _check_ted_links(rec):
+
+def check(f):
+    """Decorator to specify function is a check."""
+    wraps(f)
+    CHECKS.append(f)
+    return f
+
+
+@check
+def check_ted_links(rec):
+    """Insure ted and transcript URL's look correct."""
     tid = rec["ted_id"].strip()
     if not tid:
         return True
@@ -33,15 +46,43 @@ def _check_ted_links(rec):
     return ok
 
 
+@check
+def check_yt_links(rec):
+    """Report any youtube links that don't have TED ID's."""
+    tid = rec["ted_id"].strip()
+    ytlink = rec["youtube_url"].strip()
+    if ytlink:
+        check_yt_links.ytcount += 1
+        if not tid:
+            # log(" YT with no TED ID: %s", ytlink)
+            check_yt_links.count += 1
+    return True
+def check_yt_links_report():
+    """Final report for above check."""
+    log("Count of All YT:            %6d", check_yt_links.ytcount)
+    log("Count of YT with no TED ID: %6d", check_yt_links.count)
+check_yt_links.count = 0
+check_yt_links.ytcount = 0
+check_yt_links.report = check_yt_links_report
+
+
 def main():
     """Entry point."""
-    CHECKS = [
-        _check_ted_links,
-    ]
+    log("Checks: %s", ', '.join([f.__name__ for f in CHECKS]))
+
     ok = True
+    rcount = 0
     for r in csv.DictReader(sys.stdin):
+        rcount += 1
         for c in CHECKS:
-            ok = ok or c(r)
+            ok = c(r) or ok
+
+    for c in CHECKS:
+        final = getattr(c, "report", None)
+        if callable(final):
+            final()
+
+    log("Count of records seen: %d", rcount)
 
     if not ok:
         log("There was a failed check: will fail")
