@@ -41,7 +41,7 @@ fmt-yt:
 
 # Now create a "joined" file with information from both
 join-both:
-    command: ./join-ted.py --ted ted_talks.csv --yt yt_ted.csv > ted_joined.csv
+    command: "./join-ted.py --ted ted_talks.csv --yt yt_ted.csv > ted_joined.csv"
     delOnFail: true
     direct: true
     inputs:
@@ -51,6 +51,18 @@ join-both:
         - yt_ted.csv
     outputs:
         - ted_joined.csv
+
+# Create a DB for examinging data
+make-db:
+    command: "./tosqlite.py --out ted.db < ted_joined.csv"
+    delOnFail: true
+    direct: true
+    inputs:
+        - tosqlite.py
+        - common.py
+        - ted_joined.csv
+    outputs:
+        - ted.db
 
 # Run some checks to make sure everything is OK
 checks:
