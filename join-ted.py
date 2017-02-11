@@ -4,9 +4,12 @@
 
 # pylama:ignore=E501
 
+# TODO: use manual_map.csv to perform extra mapping
+
 import argparse
-import sys
 import csv
+import re
+import sys
 
 from common import log
 
@@ -36,6 +39,7 @@ from common import log
 
 OUTPUT_COLS = [
     "ted_id",
+    "youtube_id",  # from YTLink
     "speaker",  # Speaker in YT
     "headline",  # Descrip in YT
     "TED_URL",
@@ -90,18 +94,31 @@ def main():
     # for k in yt_keys - ted_keys:
     #     log(" %s: %s", k, yt_xref[k]["YTLink"])
 
+    ytid_re = re.compile("http://www.youtube.com/watch\?v=([-\w]+)")
+
     outp = csv.writer(sys.stdout, quoting=csv.QUOTE_NONNUMERIC)
     outp.writerow(OUTPUT_COLS)
     for k in sorted(ted_keys | yt_keys):
         ted = ted_xref.get(k, {})
         yt = yt_xref.get(k, {})
+
+        yt_link = yt.get("YTLink", "").strip()
+        if not yt_link:
+            yt_id = ""
+        else:
+            yt_matches = ytid_re.findall(yt_link)
+            if len(yt_matches) != 1:
+                raise ValueError("Invalid YouTube LINK!!!")
+            yt_id = yt_matches[0]
+
         outp.writerow([
             ted.get("id", ""),
+            yt_id,
             ted.get("speaker", yt.get("Speaker")),
             ted.get("headline", yt.get("Descrip")),
             ted.get("URL", ""),
             ted.get("transcript_URL", ""),
-            yt.get("YTLink", ""),
+            yt_link,
             ted.get("month_filmed", ""),
             ted.get("year_filmed", ""),
             ted.get("event", ""),

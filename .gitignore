@@ -2,6 +2,7 @@
 __pycache__/
 .ipynb_checkpoints/
 
-*.csv
+ted_*.csv
+yt_*.csv
 *.db
 checks.log

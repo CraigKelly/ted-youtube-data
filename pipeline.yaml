@@ -47,6 +47,7 @@ join-both:
     inputs:
         - join-ted.py
         - common.py
+        - manual_map.csv
         - ted_talks.csv
         - yt_ted.csv
     outputs:
@@ -60,6 +61,7 @@ make-db:
     inputs:
         - tosqlite.py
         - common.py
+        - matching_speakers.sql
         - ted_joined.csv
     outputs:
         - ted.db
