@@ -4,8 +4,6 @@
 
 # pylama:ignore=E501
 
-# TODO: use manual_map.csv to perform extra mapping
-
 import argparse
 import csv
 import re
@@ -65,60 +63,70 @@ def main():
     parser.add_argument("-y", "--yt", help="input youtube-ted csv file")
     args = parser.parse_args()
 
+    ted_keys, ted_xref = {}, {}
     log("Reading %s", args.ted)
     with open(args.ted) as tedin:
-        ted_xref = dict([
-            (r["headline"].strip().lower(), r)
-            for r in csv.DictReader(tedin)]
-        )
-    log("Found %d records in %s", len(ted_xref), args.ted)
+        for r in csv.DictReader(tedin):
+            ted_keys[r["id"].strip().lower()] = r
+            ted_xref[r["headline"].strip().lower()] = r
+    log("Found %d keys, %d headlines in %s", len(ted_keys), len(ted_xref), args.ted)
 
+    yt_keys, yt_xref = {}, {}
+    ytid_re = re.compile("http://www.youtube.com/watch\?v=([-\w]+)")
     log("Reading %s", args.yt)
     with open(args.yt) as ytin:
-        yt_xref = dict([
-            (r["Descrip"].strip().lower(), r)
-            for r in csv.DictReader(ytin)]
-        )
-    log("Found %d records in %s", len(yt_xref), args.yt)
+        for r in csv.DictReader(ytin):
+            yt_link = r.get("YTLink", "").strip()
+            ytid = None
+            if yt_link:
+                yt_matches = ytid_re.findall(yt_link)
+                if len(yt_matches) != 1:
+                    raise ValueError("Invalid YouTube LINK!!!")
+                ytid = yt_matches[0]
 
-    ted_keys = set(ted_xref.keys())
-    yt_keys = set(yt_xref.keys())
+            r["YTID"] = ytid
+            if ytid:
+                yt_keys[ytid] = r
 
-    log("Matched in both files: %d", len(ted_keys & yt_keys))
+            yt_xref[r["Descrip"].strip().lower()] = r
+    log("Found %d keys, %d headlines in %s", len(yt_keys), len(yt_xref), args.yt)
 
-    log("In TED talks without matching YT: %d", len(ted_keys - yt_keys))
-    # for k in ted_keys - yt_keys:
-    #     log(" %s: %s", k, ted_xref[k]["URL"])
+    # All our matches, where each entry is (ted_record, yt_record)
+    matches = []
 
-    log("In YT without matching TED talks: %d", len(yt_keys - ted_keys))
-    # for k in yt_keys - ted_keys:
-    #     log(" %s: %s", k, yt_xref[k]["YTLink"])
+    used_heads = set()
+    log("Reading manual_map.csv")
+    with open("manual_map.csv") as mapin:
+        for r in csv.DictReader(mapin):
+            tid = r["ted_id"].strip().lower()
+            ytid = r["youtube_id"].strip()
+            t = ted_keys.get(tid, None)
+            yt = yt_keys.get(ytid, None)
+            if t and yt:
+                matches.append((t, yt))
+                used_heads.add(t["headline"].strip().lower())
+                used_heads.add(yt["Descrip"].strip().lower())
+    log("Matched %d using manual ID pairs", len(matches))
 
-    ytid_re = re.compile("http://www.youtube.com/watch\?v=([-\w]+)")
+    log("Performing headline matching")
+    all_heads = set(ted_xref.keys()) | set(yt_xref.keys())
+    for h in all_heads - used_heads:
+        t = ted_xref.get(h, {})
+        yt = yt_xref.get(h, {})
+        matches.append((t, yt))
+    log("New Matched Count after headline matching: %d", len(matches))
 
     outp = csv.writer(sys.stdout, quoting=csv.QUOTE_NONNUMERIC)
     outp.writerow(OUTPUT_COLS)
-    for k in sorted(ted_keys | yt_keys):
-        ted = ted_xref.get(k, {})
-        yt = yt_xref.get(k, {})
-
-        yt_link = yt.get("YTLink", "").strip()
-        if not yt_link:
-            yt_id = ""
-        else:
-            yt_matches = ytid_re.findall(yt_link)
-            if len(yt_matches) != 1:
-                raise ValueError("Invalid YouTube LINK!!!")
-            yt_id = yt_matches[0]
-
+    for ted, yt in matches:
         outp.writerow([
             ted.get("id", ""),
-            yt_id,
+            yt.get("YTID", ""),
             ted.get("speaker", yt.get("Speaker")),
             ted.get("headline", yt.get("Descrip")),
             ted.get("URL", ""),
             ted.get("transcript_URL", ""),
-            yt_link,
+            yt.get("YTLink", ""),
             ted.get("month_filmed", ""),
             ted.get("year_filmed", ""),
             ted.get("event", ""),
