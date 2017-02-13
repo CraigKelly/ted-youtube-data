@@ -95,3 +95,20 @@ get-transcripts:
         - transcripts/get-completed
     clean:
         - transcripts/*.html
+
+# Translate all the transcript HTML files retrieved by get-transcripts above
+# NOTE: must be explicitly called from command line
+xlate-transcripts:
+    command: ./xlate_transcripts.py --dir ./transcripts 2>&1 | tee transcripts/xlate.log
+    delOnFail: false
+    direct: true
+    explicit: true
+    inputs:
+        - xlate_transcripts.py
+        - common.py
+        - transcripts/*.html
+        - transcripts/get-completed
+    outputs:
+        - transcripts/xlate.log
+    clean:
+        - transcripts/*.txt
