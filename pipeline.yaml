@@ -114,7 +114,7 @@ xlate-transcripts:
         - transcripts/*.txt
 
 zip-transcripts:
-    command: "zip -v -j transcripts.zip ted_joined.csv transcripts/xlate.log transcripts/*.txt"
+    command: "zip -v -j transcripts.zip ted_joined.csv transcripts/*.txt"
     delOnFail: false
     direct: false
     inputs:
