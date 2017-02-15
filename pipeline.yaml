@@ -111,6 +111,7 @@ xlate-transcripts:
     outputs:
         - transcripts/xlate.log
     clean:
+        - transcripts/*.transcript
         - transcripts/*.txt
 
 zip-transcripts:

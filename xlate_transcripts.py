@@ -63,12 +63,16 @@ def main():
         return os.path.join(args.dir, fn)
 
     for inp in glob.glob(outfile("*.html")):
-        newfn = inp.replace(".html", ".txt")
-        with open(inp.replace(".html", ".txt"), "w") as outp:
-            for ts, txt in xlate_one(inp):
+        lines = xlate_one(inp)
+        scriptfn = inp.replace(".html", ".transcript")
+        textfn = inp.replace(".html", ".txt")
+        with open(scriptfn, "w") as outp:
+            for ts, txt in lines:
                 ts = fmtts(ts)
                 outp.write("{} {}\n".format(ts, txt))
-        log("Wrote %s", newfn)
+        with open(textfn, "w") as outp:
+            outp.write(ws(' '.join(txt for _, txt in lines)))
+        log("Wrote transcript %s and text %s", scriptfn, textfn)
 
 
 if __name__ == '__main__':
