@@ -2,19 +2,17 @@
 
 """Join two specified CSV files and write to stdout."""
 
-# pylama:ignore=E501
+# pylama:ignore=E501,C901
 
 import argparse
 import csv
 import re
 import sys
+import json
 
 from common import log
 
-# TODO: join in {'commentCount', 'dislikeCount', 'favoriteCount', 'likeCount', 'viewCount'}
-#       from ytscrape/basics.json
-# TODO: join in {'Shares', 'Subscriptions driven', 'Views', 'Time watched'}
-#       from ytscrape/ytcrawl.parsed.json
+
 # TODO: join in the daily views with day from ytscrape/ytcrawl.parsed.json
 #       AND remember the JS day ts can be converted with
 #       datetime.datetime.utcfromtimestamp(ts/1000))
@@ -61,6 +59,15 @@ OUTPUT_COLS = [
     "views_text",  # ViewStr in YT
     "tags",
     "description",
+    "StatsCommentCount",
+    "StatsDislikeCount",
+    "StatsFavoriteCount",
+    "StatsLikeCount",
+    "StatsViewCount",
+    "BBShares",
+    "BBSubscriptions",
+    "BBViews",
+    "BBTimeWatched",
 ]
 
 
@@ -69,6 +76,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--ted", help="input ted-talks csv file")
     parser.add_argument("-y", "--yt", help="input youtube-ted csv file")
+    parser.add_argument("-s", "--stats", help="input youtube stats json file")
+    parser.add_argument("-b", "--bb", help="input youtube brag bar json file")
     args = parser.parse_args()
 
     ted_keys, ted_xref = {}, {}
@@ -124,12 +133,33 @@ def main():
         matches.append((t, yt))
     log("New Matched Count after headline matching: %d", len(matches))
 
+    log("Reading statistics from %s", args.stats)
+    stats_xref = {}
+    with open(args.stats) as inp:
+        for line in inp:
+            rec = json.loads(line)
+            stats_xref[rec['id']] = rec["statistics"]
+
+    log("Reading brag-bar from %s", args.bb)
+    bb_xref = {}
+    with open(args.bb) as inp:
+        for line in inp:
+            rec = json.loads(line)
+            bb_xref[rec['YTID']] = rec["BragBar"]
+
     outp = csv.writer(sys.stdout, quoting=csv.QUOTE_NONNUMERIC)
     outp.writerow(OUTPUT_COLS)
     for ted, yt in matches:
+        ytid = yt.get("YTID", "")
+        if ytid:
+            stats = stats_xref.get(ytid, {})
+            bb = bb_xref.get(ytid, {})
+        else:
+            stats, bb = {}, {}
+
         outp.writerow([
             ted.get("id", ""),
-            yt.get("YTID", ""),
+            ytid,
             ted.get("speaker", yt.get("Speaker")),
             ted.get("headline", yt.get("Descrip")),
             ted.get("URL", ""),
@@ -145,6 +175,15 @@ def main():
             yt.get("ViewStr", ""),
             ted.get("tags", ""),
             ted.get("description", ""),
+            stats.get("commentCount", ""),
+            stats.get("dislikeCount", ""),
+            stats.get("favoriteCount", ""),
+            stats.get("likeCount", ""),
+            stats.get("viewCount", ""),
+            bb.get("Shares", ""),
+            bb.get("Subscriptions driven", ""),
+            bb.get("Views", ""),
+            bb.get("Time watched", ""),
         ])
 
 

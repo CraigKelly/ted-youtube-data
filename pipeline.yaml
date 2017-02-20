@@ -41,7 +41,7 @@ fmt-yt:
 
 # Now create a "joined" file with information from both
 join-both:
-    command: "./join-ted.py --ted ted_talks.csv --yt yt_ted.csv > ted_joined.csv"
+    command: "./join-ted.py --ted ted_talks.csv --yt yt_ted.csv --stats ytscrape/basics.json --bb ytscrape/ytcrawl.parsed.json > ted_joined.csv"
     delOnFail: true
     direct: true
     inputs:
@@ -50,6 +50,8 @@ join-both:
         - manual_map.csv
         - ted_talks.csv
         - yt_ted.csv
+        - ytscrape/basics.json
+        - ytscrape/ytcrawl.parsed.json
     outputs:
         - ted_joined.csv
 
