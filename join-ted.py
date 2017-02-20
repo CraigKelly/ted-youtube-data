@@ -11,6 +11,9 @@ import sys
 
 from common import log
 
+# TODO: join in {'commentCount', 'dislikeCount', 'favoriteCount', 'likeCount', 'viewCount'}
+#       from ytscrape/basics.json
+
 # Not currently used but good for documentation
 # TED_COLS = [
 #     "id",
