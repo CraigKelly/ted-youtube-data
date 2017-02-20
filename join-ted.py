@@ -13,6 +13,11 @@ from common import log
 
 # TODO: join in {'commentCount', 'dislikeCount', 'favoriteCount', 'likeCount', 'viewCount'}
 #       from ytscrape/basics.json
+# TODO: join in {'Shares', 'Subscriptions driven', 'Views', 'Time watched'}
+#       from ytscrape/ytcrawl.parsed.json
+# TODO: join in the daily views with day from ytscrape/ytcrawl.parsed.json
+#       AND remember the JS day ts can be converted with
+#       datetime.datetime.utcfromtimestamp(ts/1000))
 
 # Not currently used but good for documentation
 # TED_COLS = [

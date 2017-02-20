@@ -1,4 +1,5 @@
 basics.json
+ytcrawl.parsed.json
 *.pyc
 __pycache__
 

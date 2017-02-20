@@ -79,8 +79,8 @@ checks:
         - checks.log
 
 # Get all transcript HTML files and write to ./transcripts
-# NOTE: must be explicitly called from command line AND it skips previously
-#       retrieved files
+# IMPORTANT: must be explicitly called from command line AND it skips
+# previously retrieved files
 get-transcripts:
     command: ./get_transcripts.py --dir ./transcripts < ted_joined.csv 2>&1 | tee transcripts/get.log
     delOnFail: false
@@ -97,8 +97,8 @@ get-transcripts:
         - transcripts/*.html
 
 # Translate all the transcript HTML files retrieved by get-transcripts above
-# NOTE: not explicit, but you might need to delete transcripts/xlate.log to
-#       get this step to run without explicitly calling it
+# IMPORTANT: not explicit, but you might need to delete transcripts/xlate.log
+# to get this step to run without explicitly calling it
 xlate-transcripts:
     command: ./xlate_transcripts.py --dir ./transcripts 2>&1 | tee transcripts/xlate.log
     delOnFail: false
