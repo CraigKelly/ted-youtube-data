@@ -1,0 +1,4 @@
+basics.json
+*.pyc
+__pycache__
+
