@@ -116,15 +116,31 @@ xlate-transcripts:
         - transcripts/*.transcript
         - transcripts/*.txt
 
-zip-transcripts:
-    command: "zip -v -j ted-transcripts.zip ted_joined.csv transcripts/*.txt"
-    delOnFail: false
-    direct: false
+# Extract daily views from ytscrape/ytcrawl.parsed.json - note that we currently
+# don't have a step to generate this file.
+dailies:
+    command: ./dailies.py < ytscrape/ytcrawl.parsed.json > dailies.csv
+    delOnFail: true
+    direct: true
     inputs:
-        - transcripts/*.html
+        - dailies.py
+        - common.py
+        - ytscrape/ytcrawl.parsed.json
+    outputs:
+        - dailies.csv
+
+
+# Create the ZIP file
+zip-data:
+    command: "zip -v -j ted-data.zip ted_joined.csv dailies.csv transcripts/*.txt transcripts/*.transcript"
+    delOnFail: false
+    direct: true
+    inputs:
         - transcripts/*.txt
+        - transcripts/*.transcript
         - transcripts/get-completed
         - transcripts/xlate.log
         - ted_joined.csv
+        - dailies.csv
     outputs:
-        - ted-transcripts.zip
+        - ted-data.zip

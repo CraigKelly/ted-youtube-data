@@ -13,10 +13,6 @@ import json
 from common import log
 
 
-# TODO: join in the daily views with day from ytscrape/ytcrawl.parsed.json
-#       AND remember the JS day ts can be converted with
-#       datetime.datetime.utcfromtimestamp(ts/1000))
-
 # Not currently used but good for documentation
 # TED_COLS = [
 #     "id",
