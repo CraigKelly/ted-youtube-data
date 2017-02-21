@@ -42,7 +42,7 @@ def main():
         views = rec["views"]["daily"]["data"]
 
         for d, v in zip(days, views):
-            outp.writerow([ytid, d, v])
+            outp.writerow([ytid, ts_to_day(d), v])
             written += 1
 
     log("Records read: %12d", recs)

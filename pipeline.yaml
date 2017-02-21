@@ -134,7 +134,7 @@ dailies:
 archive-data:
     command: "tar -zvcf ted-data.tar.gz ted_joined.csv dailies.csv transcripts/*.txt transcripts/*.transcript"
     delOnFail: false
-    direct: true
+    direct: false
     inputs:
         - transcripts/*.txt
         - transcripts/*.transcript
