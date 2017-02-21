@@ -8,3 +8,4 @@ dailies.csv
 *.db
 checks.log
 *.zip
+ted*.tar.gz

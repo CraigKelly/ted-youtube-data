@@ -131,8 +131,8 @@ dailies:
 
 
 # Create the ZIP file
-zip-data:
-    command: "zip -v -j ted-data.zip ted_joined.csv dailies.csv transcripts/*.txt transcripts/*.transcript"
+archive-data:
+    command: "tar -zvcf ted-data.tar.gz ted_joined.csv dailies.csv transcripts/*.txt transcripts/*.transcript"
     delOnFail: false
     direct: true
     inputs:
@@ -143,4 +143,4 @@ zip-data:
         - ted_joined.csv
         - dailies.csv
     outputs:
-        - ted-data.zip
+        - ted-data.tar.gz
