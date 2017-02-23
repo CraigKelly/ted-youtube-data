@@ -8,29 +8,6 @@ need the threadId (which is NOT the same as the TED ID).
 
 # pylama:ignore=E501,D213
 
-# TODO: here all the columns for all JSON records of comments
-# {'comment',
-#  'comment_id',
-#  'date',
-#  'date_activity',
-#  'deleted',
-#  'deleted_reason',
-#  'discussion_id',
-#  'expired',
-#  'flairs',
-#  'level',
-#  'name',
-#  'parent_id',
-#  'profile_id',
-#  'profile_pic',
-#  'profile_score',
-#  'replies',
-#  'score',
-#  'user_id'}
-
-# TODO: put in csv file (remember to include ted ID and youtube ID in file)
-# TODO: include in big ZIP file
-
 
 import argparse
 import sys

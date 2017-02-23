@@ -5,6 +5,7 @@ __pycache__/
 ted_*.csv
 yt_*.csv
 dailies.csv
+comments.csv
 *.db
 checks.log
 *.zip

@@ -145,9 +145,29 @@ get-comments:
     clean:
         - comments/*.html
 
+# Translate all the comment JSON files retrieved by get-comments above and write
+# to a single CSV file.
+# IMPORTANT: not explicit, but you might need to delete transcripts/xlate.log
+# to get this step to run without explicitly calling it
+xlate-comments:
+    command: ./xlate_comments.py --dir ./comments --out comments.csv 2>&1 | tee comments/xlate.log
+    delOnFail: false
+    direct: true
+    inputs:
+        - xlate_comments.py
+        - common.py
+        - comments/*.json
+        - comments/get-completed
+    outputs:
+        - comments/xlate.log
+        - comments.csv
+    clean:
+        - transcripts/*.txt
+
+
 # Create the ZIP file
 archive-data:
-    command: "tar -zvcf ted-data.tar.gz ted_joined.csv dailies.csv transcripts/*.txt transcripts/*.transcript"
+    command: "tar -zvcf ted-data.tar.gz ted_joined.csv dailies.csv comments.csv transcripts/*.txt transcripts/*.transcript"
     delOnFail: false
     direct: false
     inputs:
@@ -157,5 +177,6 @@ archive-data:
         - transcripts/xlate.log
         - ted_joined.csv
         - dailies.csv
+        - comments.csv
     outputs:
         - ted-data.tar.gz
