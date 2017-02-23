@@ -53,7 +53,7 @@ def xlate_one(filename):
 def main():
     """Entry point."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--dir", help="output directory")
+    parser.add_argument("-d", "--dir", help="input and output directory")
     args = parser.parse_args()
 
     if not args.dir or not os.path.isdir(args.dir):
