@@ -55,19 +55,6 @@ join-both:
     outputs:
         - ted_joined.csv
 
-# Create a DB for examinging data
-make-db:
-    command: "./tosqlite.py --out ted.db < ted_joined.csv"
-    delOnFail: true
-    direct: true
-    inputs:
-        - tosqlite.py
-        - common.py
-        - matching_speakers.sql
-        - ted_joined.csv
-    outputs:
-        - ted.db
-
 # Run some checks to make sure everything is OK
 checks:
     command: "./checks.py < ted_joined.csv 2>&1 | tee checks.log"
@@ -164,6 +151,20 @@ xlate-comments:
     clean:
         - transcripts/*.txt
 
+
+# Create a DB for examining data
+make-db:
+    command: "./tosqlite.py --joined ted_joined.csv --comments comments.csv --out ted.db"
+    delOnFail: true
+    direct: true
+    inputs:
+        - tosqlite.py
+        - common.py
+        - matching_speakers.sql
+        - ted_joined.csv
+        - comments.csv
+    outputs:
+        - ted.db
 
 # Create the ZIP file
 archive-data:

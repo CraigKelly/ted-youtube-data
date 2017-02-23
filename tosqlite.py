@@ -5,7 +5,6 @@
 # pylama:ignore=E501,D213
 
 import argparse
-import sys
 import os
 import csv
 import sqlite3
@@ -45,31 +44,21 @@ def edit_distance(s1, s2):
     return previous_row[-1] / z
 
 
-def main():
-    """Entry point."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-o", "--out", help="output sqlite file")
-    args = parser.parse_args()
-
-    if os.path.isfile(args.out):
-        os.remove(args.out)
-
-    conn = sqlite3.connect(args.out)
-    conn.create_function("edist", 2, edit_distance)
-    cur = conn.cursor()
-
+def reader_to_table(conn, tabname, csvreader):
+    """CSV to table routine."""
     headers = None
     count = 0
-    inp = csv.reader(sys.stdin)
+    cur = conn.cursor()
 
-    for rec in inp:
+    for rec in csvreader:
         if not headers:
             headers = ','.join(rec)
-            sql = "create table ted ({})".format(headers)
+            sql = "create table {} ({})".format(tabname, headers)
             cur.execute(sql)
             conn.commit()
             log("CREATED: %s", sql)
-            insert_sql = "insert into ted ({}) values ({})".format(
+            insert_sql = "insert into {} ({}) values ({})".format(
+                tabname,
                 headers,
                 ','.join(['?'] * len(rec))
             )
@@ -77,23 +66,43 @@ def main():
 
         cur.execute(insert_sql, rec)
         count += 1
-        if count % 1000 == 0:
+        if count % 50000 == 0:
             conn.commit()
-            log("Inserted %d records", count)
+            log("    Inserted %d records", count)
 
     conn.commit()
     log("BASE TABLE DONE: %d records", count)
 
+
+def main():
+    """Entry point."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-j", "--joined", required=True, help="input ted joined csv file")
+    parser.add_argument("-c", "--comments", required=True, help="input comments csv file")
+    parser.add_argument("-o", "--out", required=True, help="output sqlite file")
+    args = parser.parse_args()
+
+    if os.path.isfile(args.out):
+        os.remove(args.out)
+
+    conn = sqlite3.connect(args.out)
+    conn.create_function("edist", 2, edit_distance)
+
+    reader_to_table(conn, "ted", csv.reader(open(args.joined)))
+    reader_to_table(conn, "comments", csv.reader(open(args.comments)))
+
     # Now create author_match table
     log("Running matching_speakers.sql")
+    cur = conn.cursor()
+
     with open("matching_speakers.sql") as f:
         sql = f.read().strip()
-    for cmd in sql.split(';'):
-        if not cmd:
-            continue
-        cur.execute(cmd)
-    conn.commit()
 
+    with conn:
+        for cmd in sql.split(';'):
+            if not cmd:
+                continue
+            cur.execute(cmd)
     cur.execute("select count(*) from matching_speakers")
     log("matching_speakers record count: %d", cur.fetchone()[0])
 

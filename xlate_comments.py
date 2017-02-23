@@ -4,9 +4,6 @@
 
 # pylama:ignore=E501,D213
 
-# TODO: include in big ZIP file
-
-import sys
 import argparse
 import os
 import glob
@@ -17,23 +14,22 @@ import datetime
 from common import log
 
 OUTPUT_COLS = [
-    'comment_id',
-    'parent_id',
-    'discussion_id',
-    'user_id',
-    'name',
-    'profile_id',
-    'profile_pic',
-    'profile_score',
-    'date',
-    'date_activity',
-    'deleted',
-    'deleted_reason',
-    'expired',
-    'level',
-    'replies',
-    'score',
-    'comment',
+    'comment_id',      # identifier for the comment
+    'parent_id',       # identifier of the parent comment in the thread (or 0 if no parent)
+    'discussion_id',   # unique discussion/thread identifier (probably?)
+    'user_id',         # user identifier - these are unique and correlated with profile_id
+    'name',            # user name
+    'profile_id',      # user profile id - used if you want the user's profile page at http://www.ted.com/profiles/{profile_id}
+    'profile_pic',     # user profile pic
+    'profile_score',   # user profile score, AKA "TedCred" (see http://www.ted.com/participate/discuss/tedcred)
+    'date',            # Date of comment posting (?)
+    'date_activity',   # Date of last activity on comment (?) - note there are 9 records where date_activity < date
+    'deleted',         # true if comment was delete
+    'deleted_reason',  # reason deleted=True
+    'level',           # Assumed to be level of comment in thread (distribution of values seems to bear this out)
+    'replies',         # Number of replies
+    'score',           # Comment score - unknown scoring mechanism (59% are 0)
+    'comment',         # Actual comment with whitespace normalized
 ]
 
 
