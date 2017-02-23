@@ -2,6 +2,4 @@ get-completed
 get.log
 xlate.log
 
-*.txt
-*.html
-*.transcript
+*.json

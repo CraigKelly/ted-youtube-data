@@ -129,6 +129,21 @@ dailies:
     outputs:
         - dailies.csv
 
+# Download comments from TED
+get-comments:
+    command: ./get_comments.py --dir ./comments < ted_joined.csv 2>&1 | tee comments/get.log
+    delOnFail: false
+    direct: true
+    explicit: true
+    inputs:
+        - get_comments.py
+        - common.py
+        - ted_joined.csv
+    outputs:
+        - comments/get.log
+        - comments/get-completed
+    clean:
+        - comments/*.html
 
 # Create the ZIP file
 archive-data:
