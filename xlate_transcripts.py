@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Get transcript links from stdin and write to specified dir."""
+"""Translate all transcripts in given directory."""
 
 # pylama:ignore=E501,D213
 

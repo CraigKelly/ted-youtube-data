@@ -12,8 +12,6 @@ import datetime
 from common import log
 
 
-# TODO: join in the daily views with day from ytscrape/ytcrawl.parsed.json
-
 OUTPUT_COLS = [
     "youtube_id",
     "day",
