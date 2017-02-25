@@ -14,6 +14,7 @@ import datetime
 from common import log
 
 OUTPUT_COLS = [
+    'ted_id',          # from file name - the TED ID in ted_joined.csv
     'comment_id',      # identifier for the comment
     'parent_id',       # identifier of the parent comment in the thread (or 0 if no parent)
     'discussion_id',   # unique discussion/thread identifier (probably?)
@@ -67,13 +68,17 @@ def main():
 
         files, records, written = 0, 0, 0
         for fn in glob.glob(os.path.join(args.dir, "*.json")):
-            log("Reading %s", fn)
+            basefn = os.path.split(fn)[-1]
+            ted_id = int(os.path.splitext(basefn)[0])
+
+            log("Reading %s (TED_ID=%d)", fn, ted_id)
             files += 1
             with open(fn) as inp:
                 for line in inp:
                     rec = json.loads(line)
                     records += 1
 
+                    rec['ted_id'] = ted_id
                     rec['date'] = dt(rec.get('date', ''))
                     rec['date_activity'] = dt(rec.get('date_activity', ''))
                     rec['comment'] = ws(rec.get('comment', ''))
