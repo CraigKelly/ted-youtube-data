@@ -79,6 +79,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-j", "--joined", required=True, help="input ted joined csv file")
     parser.add_argument("-c", "--comments", required=True, help="input comments csv file")
+    parser.add_argument("-d", "--dailies", required=True, help="input daily stats csv file")
     parser.add_argument("-o", "--out", required=True, help="output sqlite file")
     args = parser.parse_args()
 
@@ -90,6 +91,7 @@ def main():
 
     reader_to_table(conn, "ted", csv.reader(open(args.joined)))
     reader_to_table(conn, "comments", csv.reader(open(args.comments)))
+    reader_to_table(conn, "dailies", csv.reader(open(args.dailies)))
 
     # Now create author_match table
     log("Running matching_speakers.sql")

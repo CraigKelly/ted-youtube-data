@@ -154,7 +154,7 @@ xlate-comments:
 
 # Create a DB for examining data
 make-db:
-    command: "./tosqlite.py --joined ted_joined.csv --comments comments.csv --out ted.db"
+    command: "./tosqlite.py --joined ted_joined.csv --comments comments.csv --dailies dailies.csv --out ted.db"
     delOnFail: true
     direct: true
     inputs:
@@ -163,6 +163,7 @@ make-db:
         - matching_speakers.sql
         - ted_joined.csv
         - comments.csv
+        - dailies.csv
     outputs:
         - ted.db
 
