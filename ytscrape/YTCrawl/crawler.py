@@ -21,7 +21,6 @@ import http.cookiejar
 from os.path import join
 
 from lib.logger import Logger
-from lib.sendemail import send_email
 from lib.xmlparser import parseString
 
 
@@ -67,22 +66,6 @@ class Crawler(object):
         self._cookie_update_on = False
 
         self._seed_videoID = 'OQSNhk5ICTI'
-
-        self._email_from_addr = ''
-        self._email_password = ''
-        self._email_to_addr = ''
-
-    def set_email_reminder(self, from_addr, password, to_addrs):
-        """Set the email reminder.
-
-        Arguments:
-        - `from_addr`: from which the email is sent
-        - `password`: the password of mailbox "from_addr"
-        - `to_addrs`: the mailbox that will recieve the reminder
-        """
-        self._email_from_addr = from_addr
-        self._email_password = password
-        self._email_to_addr = to_addrs
 
     def set_num_thread(self, n):
         """Set the number of threads used in crawling, default is 20.
@@ -185,14 +168,12 @@ class Crawler(object):
                     continue
                 else:
                     self._mutex_crawl.release()
-                    self.email('meet error when update the cookies, please set a new seed video (%s)' % str(e))
                     raise Exception('meet error when update the cookies, please set a new seed video (%s)' % str(e))
 
             state = 'success'
             break
 
         if state == 'fail':
-            self.email('times of updating cookies reaches maximum, please report this on github (%s)' % str(e))
             self._mutex_crawl.release()
             raise Exception('times of updating cookies reaches maximum, please report this on github (%s)' % str(e))
 
@@ -203,10 +184,6 @@ class Crawler(object):
         self._current_update_cookie_timer = threading.Timer(self._update_cookie_period, self.update_cookie_and_sectiontoken)
         self._current_update_cookie_timer.daemon = True
         self._current_update_cookie_timer.start()
-
-    def email(self, s):
-        """Email notification."""
-        send_email('[ acro: video history crawling: ]', s, self._email_from_addr, self._email_password, self._email_to_addr)
 
     def get_header(self, k):
         """Construct proper headers."""
