@@ -1,5 +1,9 @@
 # Created by http://www.gitignore.io
 
+batch_ytid.txt
+test.csv
+output/
+
 ### Emacs ###
 # -*- mode: gitignore; -*-
 *~
@@ -82,8 +86,6 @@ build/
 develop-eggs/
 dist/
 eggs/
-lib/
-lib64/
 parts/
 sdist/
 var/
