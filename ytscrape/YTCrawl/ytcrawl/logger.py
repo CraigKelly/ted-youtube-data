@@ -7,7 +7,7 @@
 
 
 import time
-
+import os
 from os.path import join
 
 
@@ -17,12 +17,11 @@ class Logger(object):
     def __init__(self, outputDir=""):
         """init."""
         self._output_dir = outputDir
-        self._log_file_dict = {'log': open(join(self._output_dir, 'log'), 'a+r')}
+        if not os.path.exists(self._output_dir):
+            os.makedirs(self._output_dir)
 
-        # self._mutex_done = threading.Lock()
-        # self._mutex_log = threading.Lock()
-
-        self._done_file = open(join(self._output_dir, 'key.done'), 'a+r')
+        self._log_file_dict = {'log': open(join(self._output_dir, 'log'), 'a+')}
+        self._done_file = open(join(self._output_dir, 'key.done'), 'a+')
 
     def add_log(self, d):
         """Add a log file."""
