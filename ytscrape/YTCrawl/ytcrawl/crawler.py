@@ -146,7 +146,7 @@ class Crawler(object):
             opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
             req = Request("https://www.youtube.com/watch?v="+self._seed_videoID)
             f = opener.open(req)
-            src = f.read()
+            src = str(f.read())
 
             time.sleep(self._cookie_update_delay_time)
 
@@ -158,7 +158,15 @@ class Crawler(object):
             self._cookie = self._cookie[0:-2]
 
             re_st = re.compile('\'XSRF_TOKEN\'\: \"([^\"]+)\"\,')
-            self._session_token = re_st.findall(src)[0]
+            # TODO: drop try block
+            try:
+                self._session_token = re_st.findall(src)[0]
+            except Exception as e:
+                print(re_st.findall(src))
+                print(e)
+                print(src)
+                raise
+
 
             # test
             try:
