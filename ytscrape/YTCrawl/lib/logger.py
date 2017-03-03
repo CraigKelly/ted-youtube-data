@@ -27,7 +27,7 @@ class Logger(object):
     def add_log(self, d):
         """Add a log file."""
         for i, j in d.items():
-            self._log_file_dict[i] = open(join(self._output_dir, j), 'a+r')
+            self._log_file_dict[i] = open(join(self._output_dir, j), 'a+')
 
     def get_key_done(self, lfkl):
         """Get the keys that have been crawled."""
