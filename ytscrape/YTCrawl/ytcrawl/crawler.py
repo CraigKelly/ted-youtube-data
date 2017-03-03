@@ -20,8 +20,8 @@ import http.cookiejar
 
 from os.path import join
 
-from lib.logger import Logger
-from lib.xmlparser import parseString
+from .logger import Logger
+from .xmlparser import parseString
 
 
 class Crawler(object):

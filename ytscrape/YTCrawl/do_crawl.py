@@ -73,7 +73,7 @@ def main():
         fh.write('\n')
 
     print("Starting batch process using ./output")
-    from crawler import Crawler
+    from ytcrawl.crawler import Crawler
     c = Crawler()
     c._crawl_delay_time = 1
     c._cookie_update_delay_time = 1
