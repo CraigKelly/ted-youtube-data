@@ -20,24 +20,34 @@ class Logger(object):
         if not os.path.exists(self._output_dir):
             os.makedirs(self._output_dir)
 
-        self._log_file_dict = {'log': open(join(self._output_dir, 'log'), 'a+')}
-        self._done_file = open(join(self._output_dir, 'key.done'), 'a+')
+        log_name = join(self._output_dir, 'log')
+        self._log_file_dict = {'log': open(log_name, 'a+')}
+        self._log_name_dict = {'log': log_name}
+
+        self._done_name = join(self._output_dir, 'key.done')
+        self._done_file = open(self._done_name, 'a+')
 
     def add_log(self, d):
         """Add a log file."""
         for i, j in d.items():
-            self._log_file_dict[i] = open(join(self._output_dir, j), 'a+')
+            fn = join(self._output_dir, j)
+            self._log_name_dict[i] = fn
+            self._log_file_dict[i] = open(fn, 'a+')
 
-    def get_key_done(self, lfkl):
+    def _read_done_keys(self):
+        with open(self._done_name, "r") as fh:
+            return set([i.strip() for i in fh.read().split() if i.strip()])
+
+    def _read_logged_keys(self, name):
+        with open(self._log_name_dict[name], "r") as fh:
+            return set([line.split(',')[1] for line in fh if line.strip()])
+
+    def get_key_done(self, lognames=[]):
         """Get the keys that have been crawled."""
-        r = []
-
-        for i in lfkl:
-            tmp = self._log_file_dict[i]
-            for l in tmp:
-                r.append(eval(l)[1])
-
-        return r + [x.rstrip('\n') for x in self._done_file]
+        ks = self._read_done_keys() | self._read_logged_keys('log')
+        for name in lognames:
+            ks = ks | self._read_logged_keys(name)
+        return ks
 
     def log_done(self, k):
         """Thread safe finalizer for logs."""
@@ -55,6 +65,12 @@ class Logger(object):
         - `lfk`: log_file_key
         """
         # self._mutex_log.acquire()
-        self._log_file_dict[lfk].write(str([time.strftime('%Y_%m_%d_%m_%H_%M'), k, m]) + '\n')
-        self._log_file_dict[lfk].flush()
+        msg = ','.join([
+            time.strftime('%Y-%m-%d %m:%H:%M'),
+            k,
+            m
+        ])
+        outp = self._log_file_dict[lfk]
+        outp.write(msg + '\n')
+        outp.flush()
         # self._mutex_log.release()

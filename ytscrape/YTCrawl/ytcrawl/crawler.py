@@ -146,7 +146,8 @@ class Crawler(object):
             opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
             req = Request("https://www.youtube.com/watch?v="+self._seed_videoID)
             f = opener.open(req)
-            src = str(f.read())
+            # note that we assume UTF-8 encoding from YouTube
+            src = f.read().decode('utf-8')
 
             time.sleep(self._cookie_update_delay_time)
 
@@ -158,7 +159,6 @@ class Crawler(object):
             self._cookie = self._cookie[0:-2]
 
             re_st = re.compile('\'XSRF_TOKEN\'\: \"([^\"]+)\"\,')
-            # TODO: drop try block
             try:
                 self._session_token = re_st.findall(src)[0]
             except Exception as e:
@@ -166,7 +166,6 @@ class Crawler(object):
                 print(e)
                 print(src)
                 raise
-
 
             # test
             try:
@@ -210,7 +209,7 @@ class Crawler(object):
 
     def get_post_data(self):
         """Create post data."""
-        return urllib.parse.urlencode({'session_token': self._session_token})
+        return bytes(urllib.parse.urlencode({'session_token': self._session_token}), 'utf-8')
 
     def check_key(self, k):
         """Insure key is OK."""
@@ -235,8 +234,12 @@ class Crawler(object):
 
             key = kf.strip()
 
-            if key in self._key_done or not self.check_key(key):
-                # key has already been crawled or the key is not correct
+            if key in self._key_done:
+                self._logger.log_warn(key, "Skipping prev completed key")
+                continue
+
+            if not self.check_key(key):
+                self._logger.log_warn(key, "Key is incorrect")
                 continue
 
             url = self.get_url(key)
@@ -247,37 +250,42 @@ class Crawler(object):
             try:
                 self.mutex_delay(self._crawl_delay_time)
                 request = urllib.request.Request(url, data, headers=header)
-                txt = urllib.request.urlopen(request).read()
+                txt = urllib.request.urlopen(request).read().decode('utf-8')
 
                 if '<p>Public statistics have been disabled.</p>' in txt:
-                    self._logger.log_warn(key, 'statistics disabled', 'disabled')
+                    self._logger.log_warn(key, 'statistics disabled', 'skipped')
                     self._key_done.add(key)
                     continue
 
                 if '<error_message><![CDATA[Video not found.]]></error_message>' in txt:
-                    self._logger.log_warn(key, 'Video not found', 'notfound')
+                    self._logger.log_warn(key, 'Video not found', 'skipped')
                     self._key_done.add(key)
-                    continue
-
-                if '<error_message><![CDATA[Sorry, quota limit exceeded, please retry later.]]></error_message>' in txt:
-                    self._logger.log_warn(key, 'Quota limit exceeded', 'quotalimit')
                     continue
 
                 if 'No statistics available yet' in txt:
-                    self._logger.log_warn(key, 'No statistics available yet', 'nostatyet')
+                    self._logger.log_warn(key, 'No statistics available yet', 'skipped')
                     self._key_done.add(key)
                     continue
 
-                if '<error_message><![CDATA[Invalid request.]]></error_message>' in txt:
-                    self._logger.log_warn(key, 'Invalid request', 'invalidrequest')
+                if '<error_message><![CDATA[Video is private.]]></error_message>' in txt:
+                    self._logger.log_warn(key, 'Private video', 'skipped')
+                    self._key_done.add(key)
                     continue
 
-                if '<error_message><![CDATA[Video is private.]]></error_message>' in txt:
-                    self._logger.log_warn(key, 'Private video', 'private')
+                # These aren't considered done
+                if '<error_message><![CDATA[Sorry, quota limit exceeded, please retry later.]]></error_message>' in txt:
+                    self._logger.log_warn(key, 'Quota limit exceeded', 'error')
+                    continue
 
+                if '<error_message><![CDATA[Invalid request.]]></error_message>' in txt:
+                    self._logger.log_warn(key, 'Invalid request', 'error')
+                    continue
+
+                # If we're still here we actually finished
                 self._logger.log_done(key)
                 self.store(key, txt)
                 self._key_done.add(key)
+
             except Exception as e:
                 self._logger.log_warn(key, str(e))
 
@@ -292,9 +300,9 @@ class Crawler(object):
         self._output_dir = output_dir
 
         self._logger = Logger(self._output_dir)
-        self._logger.add_log({'disabled': 'key.disabled', 'notfound': 'key.notfound', 'quotalimit': 'key.quotalimit', 'nostatyet': 'key.nostatyet', 'invalidrequest': 'key.invalidrequest', 'private': 'key.private'})
-
-        self._key_done = set(self._logger.get_key_done(['notfound', 'nostatyet', 'disabled', 'private']))
+        self._logger.add_log({'skipped': 'key.skipped', 'error': 'key.errors'})
+        self._key_done = self._logger.get_key_done(['skipped'])
+        print("Already retrieved %d keys" % len(self._key_done))
 
         self._delay_mutex = threading.Lock()
 
@@ -326,7 +334,7 @@ class Crawler(object):
         txt = ''
 
         request = urllib.request.Request(url, data, headers=header)
-        txt = urllib.request.urlopen(request).read()
+        txt = urllib.request.urlopen(request).read().decode('utf-8')
 
         if '<p>Public statistics have been disabled.</p>' in txt:
             raise Exception('statistics disabled')

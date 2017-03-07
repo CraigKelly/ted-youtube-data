@@ -67,17 +67,22 @@ def main():
 
     print("Found %d YoutTube ID's" % len(yt_ids))
 
-    print("Creating batch_ytid.txt")
-    with open("batch_ytid.txt", "w") as fh:
+    batch_file = "batch_ytid.txt"
+    output_dir = "output"
+
+    print("Creating batch file: %s" % batch_file)
+    with open(batch_file, "w") as fh:
         fh.write('\n'.join(list(sorted(yt_ids))))
         fh.write('\n')
 
-    print("Starting batch process using ./output")
+    print("Will use output directory: %s" % output_dir)
+
+    print("Starting batch process")
     from ytcrawl.crawler import Crawler
     c = Crawler()
     c._crawl_delay_time = 1
     c._cookie_update_delay_time = 1
-    c.batch_crawl('./batch_ytid.txt', './output')
+    c.batch_crawl(batch_file, output_dir)
     print("COMPLETED")
 
 
