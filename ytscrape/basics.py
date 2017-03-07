@@ -46,7 +46,7 @@ class Getter(object):
     def add(self, ytid):
         """Add ID to buffer."""
         self.buffer.add(ytid)
-        if len(self.buffer) >= 5:
+        if len(self.buffer) >= 10:
             self.get()
 
     def get(self):
@@ -55,7 +55,7 @@ class Getter(object):
             return
         params = {
             'key': KEY,
-            'part': 'statistics',
+            'part': 'statistics,snippet',
             'id': ','.join(list(self.buffer))
         }
         resp = requests.get(
